@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>nonexistent</title>
+    <style>
+        @font-face {
+  font-family: 'FT88-Italic';
+  src: url('ft88-italic.otf') format('truetype');
+}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            overflow: hidden;
+            background-color: #0a0e17;
+        }
+        
+        .container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        #video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit:fill;
+            transform: rotate(0deg) scaleX(-1);
+            filter:grayscale(100%) blur(6px);
+            
+            
+            z-index: 1;
+        }
+        
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+        }
+        
+        #typing-text {
+            font-family: 'FT88 Italic';
+            text-decoration-color: hue-rotate(90deg);
+            /* Change size by modifying this value */
+            font-size: 4.5vw;
+            
+            text-align: center;
+            color: rgb(78, 224, 25);
+            opacity: 60%;
+            padding: 20px;
+            max-width: 100%;
+        }
+        
+        h2 {
+            color: #00ccff;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        p {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: cornflowerblue;
+        }
+
+        @media only screen and (max-width: 600px) {
+            #typing-text {
+            /* Change font by modifying this value */
+            font-family: 'Arial', sans-serif;
+            
+            /* Change size by modifying this value */
+            font-size: 24vw;
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <video id="video" autoplay playsinline></video>
+        
+        <div class="overlay">
+            <div id="typing-text"></div>
+        </div>
+
+    <script>
+        // Change this text to whatever you want to display
+        const displayText = "Please don't look at me, I do not exist.";
+        
+        // Change typing speed (lower = faster)
+        const typingSpeed = 80;
+        
+        // Initialize the webcam and text
+        document.addEventListener('DOMContentLoaded', function() {
+            const video = document.getElementById('video');
+            const typingTextElement = document.getElementById('typing-text');
+            
+            // Access webcam
+            async function initCamera() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    video.srcObject = stream;
+                } catch (err) {
+                    console.error("Error accessing webcam:", err);
+                    typingTextElement.textContent = "Error accessing webcam. Please check permissions.";
+                }
+            }
+            
+            // Typing animation function
+            function typeText(text, speed = 50) {
+                let currentIndex = 0;
+                typingTextElement.textContent = '';
+                
+                const typingInterval = setInterval(() => {
+                    if (currentIndex < text.length) {
+                        typingTextElement.textContent += text.charAt(currentIndex);
+                        currentIndex++;
+                    } else {
+                        clearInterval(typingInterval);
+                    }
+                }, speed);
+            }
+            
+            // Start the camera and type the text
+            initCamera();
+            typeText(displayText, typingSpeed);
+        });
+    </script>
+</body>
+</html>
