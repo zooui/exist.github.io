@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>existent</title>
+    <style>
+        @font-face {
+            font-family: 'FT88-Italic';
+            src: url('fonts/ft88-italic.otf') format('opentype');
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --signal-color: rgb(78, 224, 25);
+            --signal-active: rgb(185, 255, 162);
+            --button-shell: rgba(10, 14, 23, 0.38);
+        }
+        
+        body {
+            overflow: hidden;
+            background-color: #21d75b42;
+        }
+        
+        .container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .control-bar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 4;
+            display: flex;
+            justify-content: center;
+            width: min(100%, 320px);
+            padding: 0 16px;
+        }
+
+        #erase-button {
+            appearance: none;
+            border: 1px solid currentColor;
+            border-radius: 999px;
+            background: var(--button-shell);
+            backdrop-filter: blur(6px);
+            color: var(--signal-color);
+            font-family: 'FT88-Italic', monospace;
+            font-size: 0.9rem;
+            line-height: 1;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            padding: 0.72rem 1rem 0.62rem;
+            cursor: pointer;
+            opacity: 0.9;
+            transition: color 160ms ease, border-color 160ms ease, background-color 160ms ease, opacity 160ms ease;
+        }
+
+        #erase-button:hover,
+        #erase-button:focus-visible,
+        #erase-button.is-active {
+            color: var(--signal-active);
+            background-color: rgba(185, 255, 162, 0.12);
+            outline: none;
+        }
+
+        #erase-button:disabled {
+            cursor: default;
+            opacity: 0.55;
+        }
+        
+        #video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: fill;
+            transform: rotate(0deg) scaleX(-1);
+            filter: grayscale(100%) blur(6px);
+            z-index: 1;
+        }
+        
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+        }
+        
+        #typing-text {
+            font-family: 'FT88-Italic', sans-serif;
+            text-decoration-color: hue-rotate(90deg);
+            font-size: 4.5vw;
+            text-align: center;
+            color: var(--signal-color);
+            opacity: 60%;
+            padding: 20px;
+            max-width: 100%;
+        }
+        
+        h2 {
+            color: #00ccff;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        p {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: cornflowerblue;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .control-bar {
+                top: 16px;
+            }
+
+            #erase-button {
+                width: 100%;
+                font-size: 0.82rem;
+            }
+
+            #typing-text {
+                font-size: 14vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <video id="video" autoplay playsinline></video>
+
+        <div class="control-bar">
+            <button id="erase-button" type="button" aria-label="Toggle the phrase">Exist</button>
+        </div>
+        
+        <div class="overlay">
+            <div id="typing-text"></div>
+        </div>
+    </div>
+
+    <script>
+        const displayText = "Please don't look at me, I do not exist.";
+        const typingSpeed = 120;
+        const backspaceSpeed = 55;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const video = document.getElementById('video');
+            const typingTextElement = document.getElementById('typing-text');
+            const eraseButton = document.getElementById('erase-button');
+            let animationTimer;
+            let isAnimating = false;
+            let textVisible = false;
+            
+            async function initCamera() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    video.srcObject = stream;
+                } catch (err) {
+                    console.error('Error accessing webcam:', err);
+                    typingTextElement.textContent = 'Error accessing webcam. Please check permissions.';
+                }
+            }
+            
+            function clearAnimation() {
+                window.clearTimeout(animationTimer);
+            }
+
+            function typeText(text, speed = typingSpeed) {
+                clearAnimation();
+                typingTextElement.textContent = '';
+                isAnimating = true;
+                textVisible = false;
+                eraseButton.disabled = false;
+                eraseButton.classList.remove('is-active');
+                eraseButton.textContent = 'Exist';
+
+                let currentIndex = 0;
+
+                function addCharacter() {
+                    if (currentIndex < text.length) {
+                        typingTextElement.textContent += text.charAt(currentIndex);
+                        currentIndex += 1;
+                        animationTimer = window.setTimeout(addCharacter, speed);
+                    } else {
+                        isAnimating = false;
+                        textVisible = true;
+                        eraseButton.textContent = 'Exist';
+                    }
+                }
+
+                addCharacter();
+            }
+
+            function backspaceText(speed = backspaceSpeed) {
+                clearAnimation();
+                isAnimating = true;
+                eraseButton.disabled = true;
+                eraseButton.classList.add('is-active');
+                eraseButton.textContent = 'Exist';
+
+                function removeCharacter() {
+                    const currentText = typingTextElement.textContent;
+
+                    if (currentText.length > 0) {
+                        typingTextElement.textContent = currentText.slice(0, -1);
+                        animationTimer = window.setTimeout(removeCharacter, speed);
+                        return;
+                    }
+
+                    eraseButton.disabled = false;
+                    isAnimating = false;
+                    textVisible = false;
+                }
+
+                removeCharacter();
+            }
+
+            eraseButton.addEventListener('click', function() {
+                if (isAnimating) {
+                    return;
+                }
+
+                if (textVisible) {
+                    backspaceText();
+                } else {
+                    typeText(displayText, typingSpeed);
+                }
+            });
+
+            initCamera();
+            typeText(displayText, typingSpeed);
+        });
+    </script>
+</body>
+</html>
